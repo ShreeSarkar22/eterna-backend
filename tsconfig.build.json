@@ -2,9 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "emitDeclarationOnly": false,
-    "types": ["node"], 
+    "isolatedModules": true,
     "skipLibCheck": true,
+    "noImplicitAny": false,
+    "types": [],
     "rootDir": "./src",
     "outDir": "./dist"
   },
