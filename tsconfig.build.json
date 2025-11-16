@@ -3,10 +3,11 @@
   "compilerOptions": {
     "noEmit": false,
     "emitDeclarationOnly": false,
-    "types": ["node"],
+    "types": ["node"], 
+    "skipLibCheck": true,
     "rootDir": "./src",
     "outDir": "./dist"
   },
   "include": ["src"],
-  "exclude": ["tests", "**/*.test.ts"]
+  "exclude": ["tests", "**/*.test.ts", "**/*.spec.ts"]
 }
