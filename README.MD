@@ -200,7 +200,7 @@ WebSocket Updates: Background job → Check changes → Broadcast to clients
 - API Integration: All endpoints, Error handling, Parameter validation
 - WebSocket: Connection, Events, Subscriptions
 
-## 📊 Performance Benchmarks
+## Performance Benchmarks
 
 Expected performance metrics:
 
