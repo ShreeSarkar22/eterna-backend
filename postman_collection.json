@@ -1,0 +1,247 @@
+{
+  "info": {
+    "name": "Meme Coin Aggregator API",
+    "description": "Real-time meme coin data aggregation service API collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Check if the service is running"
+      }
+    },
+    {
+      "name": "Get All Tokens",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tokens?limit=20&sort_by=volume&sort_order=desc",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tokens"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "20",
+              "description": "Number of tokens to return"
+            },
+            {
+              "key": "sort_by",
+              "value": "volume",
+              "description": "Sort field (volume, market_cap, liquidity, price_change)"
+            },
+            {
+              "key": "sort_order",
+              "value": "desc",
+              "description": "Sort order (asc, desc)"
+            }
+          ]
+        },
+        "description": "Get paginated list of tokens with sorting"
+      }
+    },
+    {
+      "name": "Get Tokens with Filters",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tokens?limit=10&min_volume=100&min_liquidity=50&sort_by=volume",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tokens"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10"
+            },
+            {
+              "key": "min_volume",
+              "value": "100",
+              "description": "Minimum volume in SOL"
+            },
+            {
+              "key": "min_liquidity",
+              "value": "50",
+              "description": "Minimum liquidity in SOL"
+            },
+            {
+              "key": "sort_by",
+              "value": "volume"
+            }
+          ]
+        },
+        "description": "Get tokens with volume and liquidity filters"
+      }
+    },
+    {
+      "name": "Get Tokens - Page 2",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tokens?limit=20&cursor=MjA=",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tokens"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "20"
+            },
+            {
+              "key": "cursor",
+              "value": "MjA=",
+              "description": "Cursor from previous response"
+            }
+          ]
+        },
+        "description": "Get next page using cursor from previous response"
+      }
+    },
+    {
+      "name": "Search Tokens",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tokens/search?q=SOL&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tokens", "search"],
+          "query": [
+            {
+              "key": "q",
+              "value": "SOL",
+              "description": "Search query"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "description": "Search for tokens by name or ticker"
+      }
+    },
+    {
+      "name": "Get Token by Address",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tokens/576P1t7XsRL4ZVj38LV2eYWxXRPguBADA8BxcNz1xo8y",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tokens", "576P1t7XsRL4ZVj38LV2eYWxXRPguBADA8BxcNz1xo8y"]
+        },
+        "description": "Get specific token by its address"
+      }
+    },
+    {
+      "name": "Refresh Cache",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tokens/refresh",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tokens", "refresh"]
+        },
+        "description": "Manually invalidate cache and force fresh data fetch"
+      }
+    },
+    {
+      "name": "Sort by Market Cap",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tokens?sort_by=market_cap&sort_order=desc&limit=15",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tokens"],
+          "query": [
+            {
+              "key": "sort_by",
+              "value": "market_cap"
+            },
+            {
+              "key": "sort_order",
+              "value": "desc"
+            },
+            {
+              "key": "limit",
+              "value": "15"
+            }
+          ]
+        },
+        "description": "Get tokens sorted by market cap"
+      }
+    },
+    {
+      "name": "Sort by Price Change",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tokens?sort_by=price_change&sort_order=desc&limit=20",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tokens"],
+          "query": [
+            {
+              "key": "sort_by",
+              "value": "price_change"
+            },
+            {
+              "key": "sort_order",
+              "value": "desc"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "description": "Get tokens with highest price changes"
+      }
+    },
+    {
+      "name": "High Volume Tokens",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/tokens?min_volume=500&sort_by=volume&sort_order=desc",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "tokens"],
+          "query": [
+            {
+              "key": "min_volume",
+              "value": "500"
+            },
+            {
+              "key": "sort_by",
+              "value": "volume"
+            },
+            {
+              "key": "sort_order",
+              "value": "desc"
+            }
+          ]
+        },
+        "description": "Get only high volume tokens"
+      }
+    }
+  ]
+}

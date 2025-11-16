@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meme Coin Aggregator - WebSocket Demo</title>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .status.connected {
+            background: #10b981;
+        }
+        
+        .status.disconnected {
+            background: #ef4444;
+        }
+        
+        .controls {
+            padding: 20px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #059669;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .token-list {
+            background: white;
+        }
+        
+        .token-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .token-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .token-card.updated {
+            animation: pulse 1s;
+            border-color: #10b981;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .token-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .token-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .token-ticker {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        .token-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .stat {
+            background: #f9fafb;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .stat-label {
+            font-size: 0.85em;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .positive {
+            color: #10b981;
+        }
+        
+        .negative {
+            color: #ef4444;
+        }
+        
+        .activity-log {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .activity-log h3 {
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+        
+        .log-entry {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            font-size: 0.9em;
+        }
+        
+        .log-time {
+            color: #6b7280;
+            font-size: 0.85em;
+        }
+        
+        .log-spike {
+            border-left-color: #f59e0b;
+        }
+        
+        .log-update {
+            border-left-color: #10b981;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Meme Coin Aggregator</h1>
+            <p>Real-time token data streaming</p>
+            <div id="status" class="status disconnected">Disconnected</div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-primary" onclick="connect()">Connect</button>
+            <button class="btn-primary" onclick="disconnect()">Disconnect</button>
+            <button class="btn-secondary" onclick="refresh()">Refresh Data</button>
+            <button class="btn-secondary" onclick="clearLogs()">Clear Logs</button>
+        </div>
+        
+        <div class="content">
+            <div class="token-list">
+                <h2 style="margin-bottom: 20px;">Live Tokens</h2>
+                <div id="tokens"></div>
+            </div>
+            
+            <div class="activity-log">
+                <h3>Activity Log</h3>
+                <div id="logs"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        const tokens = new Map();
+        
+        function connect() {
+            if (socket) {
+                addLog('Already connected');
+                return;
+            }
+            
+            socket = io('http://localhost:3000');
+            
+            socket.on('connect', () => {
+                updateStatus(true);
+                addLog('Connected to server', 'update');
+            });
+            
+            socket.on('disconnect', () => {
+                updateStatus(false);
+                addLog('Disconnected from server');
+            });
+            
+            socket.on('initial_data', (data) => {
+                addLog(`Received ${data.tokens.length} tokens`, 'update');
+                displayTokens(data.tokens);
+            });
+            
+            socket.on('price_updates', (event) => {
+                addLog(`Price updates: ${event.data.length} tokens`, 'update');
+                updateTokens(event.data);
+            });
+            
+            socket.on('volume_spikes', (event) => {
+                addLog(`Volume spikes detected: ${event.data.length} tokens`, 'spike');
+                updateTokens(event.data);
+            });
+            
+            socket.on('error', (error) => {
+                addLog(`Error: ${error.message}`);
+            });
+        }
+        
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+                updateStatus(false);
+            }
+        }
+        
+        function refresh() {
+            if (socket) {
+                socket.emit('refresh');
+                addLog('Requested data refresh', 'update');
+            } else {
+                addLog('Not connected');
+            }
+        }
+        
+        function updateStatus(connected) {
+            const status = document.getElementById('status');
+            status.textContent = connected ? 'Connected' : 'Disconnected';
+            status.className = 'status ' + (connected ? 'connected' : 'disconnected');
+        }
+        
+        function displayTokens(tokenList) {
+            const container = document.getElementById('tokens');
+            
+            if (tokenList.length === 0) {
+                container.innerHTML = '<div class="no-data">No tokens available</div>';
+                return;
+            }
+            
+            tokenList.forEach(token => {
+                tokens.set(token.token_address, token);
+            });
+            
+            renderTokens();
+        }
+        
+        function updateTokens(tokenList) {
+            tokenList.forEach(token => {
+                tokens.set(token.token_address, token);
+                highlightToken(token.token_address);
+            });
+            renderTokens();
+        }
+        
+        function renderTokens() {
+            const container = document.getElementById('tokens');
+            const tokenArray = Array.from(tokens.values()).slice(0, 20);
+            
+            container.innerHTML = tokenArray.map(token => `
+                <div class="token-card" id="token-${token.token_address}">
+                    <div class="token-header">
+                        <div class="token-name">${token.token_name}</div>
+                        <div class="token-ticker">${token.token_ticker}</div>
+                    </div>
+                    <div class="token-stats">
+                        <div class="stat">
+                            <div class="stat-label">Price (SOL)</div>
+                            <div class="stat-value">${token.price_sol.toFixed(8)}</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">1hr Change</div>
+                            <div class="stat-value ${token.price_1hr_change >= 0 ? 'positive' : 'negative'}">
+                                ${token.price_1hr_change >= 0 ? '+' : ''}${token.price_1hr_change.toFixed(2)}%
+                            </div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Volume (SOL)</div>
+                            <div class="stat-value">${token.volume_sol.toFixed(2)}</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Market Cap (SOL)</div>
+                            <div class="stat-value">${token.market_cap_sol.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.85em; color: #6b7280;">
+                        ${token.protocol} • ${token.transaction_count} txns
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function highlightToken(address) {
+            const element = document.getElementById(`token-${address}`);
+            if (element) {
+                element.classList.add('updated');
+                setTimeout(() => element.classList.remove('updated'), 1000);
+            }
+        }
+        
+        function addLog(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry log-' + type;
+            entry.innerHTML = `
+                <div class="log-time">${time}</div>
+                <div>${message}</div>
+            `;
+            logs.insertBefore(entry, logs.firstChild);
+            
+            // Keep only last 50 logs
+            while (logs.children.length > 50) {
+                logs.removeChild(logs.lastChild);
+            }
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+            addLog('Logs cleared');
+        }
+        
+        // Auto-connect on load
+        window.addEventListener('load', () => {
+            setTimeout(connect, 500);
+        });
+    </script>
+</body>
+</html>
