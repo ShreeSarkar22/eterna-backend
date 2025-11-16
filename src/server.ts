@@ -97,7 +97,7 @@ class App {
             subscribe_token: 'Subscribe to specific token',
           },
         },
-        documentation: 'https://github.com/yourusername/meme-coin-aggregator',
+        documentation: 'https://github.com/ShreeSarkar22/eterna-backend',
       });
     });
   }
