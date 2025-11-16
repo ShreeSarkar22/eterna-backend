@@ -289,5 +289,5 @@ All configuration is in `src/config/index.ts`:
 - Jupiter Aggregator
 
 
-**Demo Video**: [YouTube Link]
+**Demo Video**: https://www.youtube.com/watch?v=PMm89Et5Xio
 **Live Demo**: https://eterna-backend-zt7y.onrender.com/
